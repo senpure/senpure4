@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.senpure.base.mapper.ContainerMapper">
+    <resultMap id="containerResultMap" type="com.senpure.base.model.Container">
+        <id     column="id"                   property="id"                  jdbcType="INTEGER"/>   <!-- 主键 -->
+        <result column="version"              property="version"             jdbcType="INTEGER"/>   <!-- 乐观锁，版本控制 -->
+        <result column="name"                 property="name"                jdbcType="VARCHAR"/>
+        <result column="description"          property="description"         jdbcType="VARCHAR"/>
+        <result column="level"                property="level"               jdbcType="INTEGER"/>
+        <result column="relation"             property="relation"            jdbcType="BIGINT"/>
+        <result column="create_time"          property="createTime"          jdbcType="BIGINT"/>
+        <result column="create_date"          property="createDate"          jdbcType="TIMESTAMP"/>
+        <result column="container_structure"  property="containerStructure"  jdbcType="VARCHAR"/>   <!-- 所属容器层次结构,主要是为了查询,多有用like查询 -1-2-3-12- -->
+        <result column="parent_id"            property="parentId"            jdbcType="INTEGER"/>   <!-- 父容器ID(外键,modelName:Container,tableName:senpure_container) -->
+    </resultMap>
+    <sql id="containerAllColumns">
+        id,version,name,description,level,relation,create_time,create_date,container_structure,parent_id
+    </sql>
+
+    <!--主键查找-->
+    <select id="find" resultMap="containerResultMap" parameterType="Integer">
+        select <include refid="containerAllColumns"/> from senpure_container where id = #{id}
+    </select>
+
+    <!--主键删除-->
+    <delete id="delete" parameterType="Integer">
+        delete from senpure_container where id = #{id}
+    </delete>
+
+    <!--按条件删除(不取主键的值进行对比，即主键无效化)-->
+    <delete id="deleteByCriteria" parameterType="com.senpure.base.criteria.ContainerCriteria">
+        delete from senpure_container
+        <where>
+            <if test="parentId != null">
+                and parent_id = #{parentId}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="description != null">
+                and description = #{description}
+            </if>
+            <if test="level != null">
+                and level = #{level}
+            </if>
+            <if test="relation != null">
+                and relation = #{relation}
+            </if>
+            <if test="startDate != null">
+                and create_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                and create_time &lt;= #{endDate.time}
+            </if>
+            <if test="containerStructure != null">
+                and container_structure = #{containerStructure}
+            </if>
+        </where>
+    </delete>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="save" parameterType="com.senpure.base.model.Container" >
+        insert into senpure_container (<include refid="containerAllColumns"/>)
+        values (#{id},1,#{name},#{description},#{level},#{relation},#{createTime},#{createDate},#{containerStructure},#{parentId})
+    </insert>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="saveBatch" parameterType="com.senpure.base.model.Container" >
+        insert into senpure_container (<include refid="containerAllColumns"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id},1,#{item.name},#{item.description},#{item.level},#{item.relation},#{item.createTime},#{item.createDate},#{item.containerStructure},#{item.parentId})
+        </foreach>
+    </insert>
+
+    <!--会进行对象的空值判断，不为空才更新，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="update" parameterType="com.senpure.base.model.Container">
+        update senpure_container
+        <set>
+                <bind name="versionUpdate" value="version + 1"/>
+                version = #{versionUpdate},
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="level != null">
+                level = #{level},
+            </if>
+            <if test="relation != null">
+                relation = #{relation},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="createDate != null">
+                create_date = #{createDate},
+            </if>
+            <if test="containerStructure != null">
+                container_structure = #{containerStructure},
+            </if>
+            <if test="parentId != null">
+                parent_id = #{parentId},
+            </if>
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!-- 直接将值覆盖到数据库，不会做为空判断，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="cover" parameterType="com.senpure.base.model.Container">
+        update senpure_container
+        <set>
+            <bind name="versionUpdate" value="version + 1"/>
+            version = #{versionUpdate},
+            name = #{name},
+            description = #{description},
+            level = #{level},
+            relation = #{relation},
+            create_time = #{createTime},
+            create_date = #{createDate},
+            container_structure = #{containerStructure},
+            parent_id = #{parentId},
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!--会进行对象的空值判断，不为空才更新，主键无值时，可以进行批量更新-->
+    <update id="updateByCriteria" parameterType="com.senpure.base.criteria.ContainerCriteria">
+        update senpure_container
+        <set>
+            <choose>
+                <when test="version != null">
+                    <bind name="versionUpdate" value="version + 1"/>
+                    version = #{versionUpdate},
+                </when>
+                <otherwise>
+                    version = version + 1,
+                </otherwise>
+            </choose>
+                <if test="name != null">
+                    name = #{name},
+                </if>
+                <if test="description != null">
+                    description = #{description},
+                </if>
+                <if test="level != null">
+                    level = #{level},
+                </if>
+                <if test="relation != null">
+                    relation = #{relation},
+                </if>
+                <if test="createTime != null">
+                    create_time = #{createTime},
+                </if>
+                <if test="createDate != null">
+                    create_date = #{createDate},
+                </if>
+                <if test="containerStructure != null">
+                    container_structure = #{containerStructure},
+                </if>
+                <if test="parentId != null">
+                    parent_id = #{parentId},
+                </if>
+        </set>
+        <where>
+                <if test="id != null">
+                    id = #{id}
+                 </if>
+                <if test="startDate != null">
+                    and create_time >= #{startDate.time}
+                </if>
+                <if test="endDate != null">
+                    and create_time &lt;= #{endDate.time}
+                </if>
+                <if test="version != null">
+                    and version =  #{version}
+                </if>
+        </where>
+     </update>
+
+    <select id="count" resultType="int">
+        select count(*) from senpure_container
+    </select>
+
+    <select id="findAll" resultMap="containerResultMap" parameterType="Integer">
+        select <include refid="containerAllColumns"/> from senpure_container
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="countByCriteria" resultType="int" parameterType="com.senpure.base.criteria.ContainerCriteria">
+        select count(*) from senpure_container
+        <where>
+            <if test="parentId != null">
+                and parent_id = #{parentId}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="description != null">
+                and description = #{description}
+            </if>
+            <if test="level != null">
+                and level = #{level}
+            </if>
+            <if test="relation != null">
+                and relation = #{relation}
+            </if>
+            <if test="startDate != null">
+               and create_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                 and create_time &lt;= #{endDate.time}
+            </if>
+            <if test="containerStructure != null">
+                and container_structure = #{containerStructure}
+            </if>
+        </where>
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="findByCriteria" parameterType="com.senpure.base.criteria.ContainerCriteria" resultMap="containerResultMap">
+        select <include refid="containerAllColumns"/>
+        from senpure_container
+        <where>
+            <if test="parentId != null">
+                and parent_id = #{parentId}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="description != null">
+                and description = #{description}
+            </if>
+            <if test="level != null">
+                and level = #{level}
+            </if>
+            <if test="relation != null">
+                and relation = #{relation}
+            </if>
+            <if test="startDate != null">
+                and create_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                and create_time &lt;= #{endDate.time}
+            </if>
+            <if test="containerStructure != null">
+                and container_structure = #{containerStructure}
+            </if>
+        </where>
+        <if test="hasOrder">
+            ORDER BY
+            <foreach collection="order" index="key" item="item" separator=",">
+                <if test="item == 'DESC'">
+                    ${key} DESC
+                </if>
+                <if test="item == 'ASC'">
+                    ${key} ASC
+                </if>
+            </foreach>
+        </if>
+        <if test="usePage">
+            <choose>
+                <when test="firstResult == 0">
+                    limit #{maxResults}
+                </when>
+                <otherwise>
+                    limit #{firstResult}, #{maxResults}
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+</mapper>

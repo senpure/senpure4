@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.senpure.base.mapper.URIPermissionMapper">
+    <resultMap id="uRIPermissionResultMap" type="com.senpure.base.model.URIPermission">
+        <id     column="id"               property="id"              jdbcType="BIGINT"/>  <!-- 主键 -->
+        <result column="version"          property="version"         jdbcType="INTEGER"/> <!-- 乐观锁，版本控制 -->
+        <result column="uri_and_method"   property="uriAndMethod"    jdbcType="VARCHAR"/>
+        <result column="database_update"  property="databaseUpdate"  jdbcType="BIT"/>     <!-- 是否从数据库更新过 -->
+        <result column="permission_id"    property="permissionId"    jdbcType="BIGINT"/>  <!-- 外键,modelName:Permission,tableName:senpure_permission -->
+    </resultMap>
+    <sql id="uRIPermissionAllColumns">
+        id,version,uri_and_method,database_update,permission_id
+    </sql>
+
+    <!--主键查找-->
+    <select id="find" resultMap="uRIPermissionResultMap" parameterType="Long">
+        select <include refid="uRIPermissionAllColumns"/> from senpure_uri_permission where id = #{id}
+    </select>
+
+    <!--主键删除-->
+    <delete id="delete" parameterType="Long">
+        delete from senpure_uri_permission where id = #{id}
+    </delete>
+
+    <!--按条件删除(不取主键的值进行对比，即主键无效化)-->
+    <delete id="deleteByCriteria" parameterType="com.senpure.base.criteria.URIPermissionCriteria">
+        delete from senpure_uri_permission
+        <where>
+            <if test="permissionId != null">
+                and permission_id = #{permissionId}
+            </if>
+            <if test="uriAndMethod != null">
+                and uri_and_method = #{uriAndMethod}
+            </if>
+            <if test="databaseUpdate != null">
+                and database_update = #{databaseUpdate}
+            </if>
+        </where>
+    </delete>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="save" parameterType="com.senpure.base.model.URIPermission" >
+        insert into senpure_uri_permission (<include refid="uRIPermissionAllColumns"/>)
+        values (#{id},1,#{uriAndMethod},#{databaseUpdate},#{permissionId})
+    </insert>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="saveBatch" parameterType="com.senpure.base.model.URIPermission" >
+        insert into senpure_uri_permission (<include refid="uRIPermissionAllColumns"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id},1,#{item.uriAndMethod},#{item.databaseUpdate},#{item.permissionId})
+        </foreach>
+    </insert>
+
+    <!--会进行对象的空值判断，不为空才更新，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="update" parameterType="com.senpure.base.model.URIPermission">
+        update senpure_uri_permission
+        <set>
+                <bind name="versionUpdate" value="version + 1"/>
+                version = #{versionUpdate},
+            <if test="uriAndMethod != null">
+                uri_and_method = #{uriAndMethod},
+            </if>
+            <if test="databaseUpdate != null">
+                database_update = #{databaseUpdate},
+            </if>
+            <if test="permissionId != null">
+                permission_id = #{permissionId},
+            </if>
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!-- 直接将值覆盖到数据库，不会做为空判断，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="cover" parameterType="com.senpure.base.model.URIPermission">
+        update senpure_uri_permission
+        <set>
+            <bind name="versionUpdate" value="version + 1"/>
+            version = #{versionUpdate},
+            uri_and_method = #{uriAndMethod},
+            database_update = #{databaseUpdate},
+            permission_id = #{permissionId},
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!--会进行对象的空值判断，不为空才更新，主键无值时，可以进行批量更新-->
+    <update id="updateByCriteria" parameterType="com.senpure.base.criteria.URIPermissionCriteria">
+        update senpure_uri_permission
+        <set>
+            <choose>
+                <when test="version != null">
+                    <bind name="versionUpdate" value="version + 1"/>
+                    version = #{versionUpdate},
+                </when>
+                <otherwise>
+                    version = version + 1,
+                </otherwise>
+            </choose>
+                <if test="uriAndMethod != null">
+                    uri_and_method = #{uriAndMethod},
+                </if>
+                <if test="databaseUpdate != null">
+                    database_update = #{databaseUpdate},
+                </if>
+                <if test="permissionId != null">
+                    permission_id = #{permissionId},
+                </if>
+        </set>
+        <where>
+                <if test="id != null">
+                    id = #{id}
+                 </if>
+                <if test="version != null">
+                    and version =  #{version}
+                </if>
+        </where>
+     </update>
+
+    <select id="count" resultType="int">
+        select count(*) from senpure_uri_permission
+    </select>
+
+    <select id="findAll" resultMap="uRIPermissionResultMap" parameterType="Long">
+        select <include refid="uRIPermissionAllColumns"/> from senpure_uri_permission
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="countByCriteria" resultType="int" parameterType="com.senpure.base.criteria.URIPermissionCriteria">
+        select count(*) from senpure_uri_permission
+        <where>
+            <if test="permissionId != null">
+                and permission_id = #{permissionId}
+            </if>
+            <if test="uriAndMethod != null">
+                and uri_and_method = #{uriAndMethod}
+            </if>
+            <if test="databaseUpdate != null">
+                and database_update = #{databaseUpdate}
+            </if>
+        </where>
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="findByCriteria" parameterType="com.senpure.base.criteria.URIPermissionCriteria" resultMap="uRIPermissionResultMap">
+        select <include refid="uRIPermissionAllColumns"/>
+        from senpure_uri_permission
+        <where>
+            <if test="permissionId != null">
+                and permission_id = #{permissionId}
+            </if>
+            <if test="uriAndMethod != null">
+                and uri_and_method = #{uriAndMethod}
+            </if>
+            <if test="databaseUpdate != null">
+                and database_update = #{databaseUpdate}
+            </if>
+        </where>
+        <if test="hasOrder">
+            ORDER BY
+            <foreach collection="order" index="key" item="item" separator=",">
+                <if test="item == 'DESC'">
+                    ${key} DESC
+                </if>
+                <if test="item == 'ASC'">
+                    ${key} ASC
+                </if>
+            </foreach>
+        </if>
+        <if test="usePage">
+            <choose>
+                <when test="firstResult == 0">
+                    limit #{maxResults}
+                </when>
+                <otherwise>
+                    limit #{firstResult}, #{maxResults}
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+</mapper>

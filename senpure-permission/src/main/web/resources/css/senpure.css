@@ -1,0 +1,170 @@
+.rounded {
+    border: 1px solid transparent;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.senpure-menu {
+
+}
+
+.senpure-menu .collapsed > span.glyphicon-chevron-toggle:before {
+    content: "\e114";
+}
+
+.senpure-menu span.glyphicon-chevron-toggle:before {
+    content: "\e113";
+}
+
+.senpure-menu .badge {
+    margin-right: 5px;
+    background-color: #f51;
+}
+
+.senpure-menu a .fa, .senpure-menu a .glyphicon {
+    margin-right: 5px;
+}
+
+.navbar-toggle .badge {
+    position: absolute;
+    right: 1px;
+    top: 0px;
+    background-color: #f51;
+}
+
+.senpure-menu-leaf-container {
+    padding-left: 20px;
+}
+
+.margin-0 {
+    margin: 0px;
+}
+
+.margin-top-0 {
+    margin-top: 0px;
+}
+
+.margin-top-5 {
+    margin-top: 5px;
+}
+
+.margin-top-15 {
+    margin-top: 15px;
+}
+
+.margin-top-10 {
+    margin-top: 10px;
+}
+
+.margin-bottom-2 {
+    margin-bottom: 2px;
+}
+
+.margin-bottom-0 {
+    margin-bottom: 0px;
+}
+
+.margin-bottom-5 {
+    margin-bottom: 5px;
+}
+
+.margin-bottom-10 {
+    margin-bottom: 10px;
+}
+
+.margin-bottom-15 {
+    margin-bottom: 15px;
+}
+
+.pagination li span, .pagination li a {
+    margin-bottom: 5px;
+}
+
+.pagination-select {
+    height: 34px;
+    line-height: 34px;
+    overflow: hidden;
+}
+
+.cursor-arrow {
+    cursor: default;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+@media screen and (max-width: 767px) {
+    .pagination > li:first-child > a, .pagination > li:first-child > span {
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+    }
+
+    .pagination > li:last-child > a, .pagination > li:last-child > span {
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+    }
+}
+
+.pagination > .pagination-select select {
+    height: 14px;
+}
+
+.pagination-top, .pagination-bottom {
+    padding: 0px;
+    margin: 0px;
+}
+
+.senpure-pagination {
+    display: inline-block;
+    padding-left: 0;
+    margin: 3px 0;
+    border-radius: 4px;
+}
+
+.senpure-pagination > span, .senpure-pagination > a {
+    position: relative;
+    margin-top: 3px;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.42857143;
+    color: #337ab7;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.to-top {
+    position: fixed;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    z-index: 2;
+    font-size: 32px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 60px;
+    bottom: 5px;
+    right: 31px;
+    display: none;
+    border: 1px solid red;
+    color: #337ab7;
+    border-radius: 4px;
+    display: none;
+}
+
+.criteria-br {
+    margin-bottom: 10px;
+}
+
+.criteria-order {
+	display: none;
+}
+
+@-moz-document url-prefix() {
+    fieldset {
+        display: table-cell;
+    }
+}

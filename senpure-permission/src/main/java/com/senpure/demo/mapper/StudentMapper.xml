@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.senpure.demo.mapper.StudentMapper">
+    <resultMap id="studentResultMap" type="com.senpure.demo.model.Student">
+        <id     column="id"            property="id"           jdbcType="BIGINT"/>    <!-- 主键 -->
+        <result column="version"       property="version"      jdbcType="INTEGER"/>   <!-- 乐观锁，版本控制 -->
+        <result column="name"          property="name"         jdbcType="VARCHAR"/>
+        <result column="nick"          property="nick"         jdbcType="VARCHAR"/>   <!-- 自己取得外号，如齐天大圣，狗蛋 -->
+        <result column="create_date"   property="createDate"   jdbcType="TIMESTAMP"/> <!-- 创建时间 -->
+        <result column="create_time"   property="createTime"   jdbcType="BIGINT"/>    <!-- 创建时间，时间戳 -->
+        <result column="phone_number"  property="phoneNumber"  jdbcType="VARCHAR"/>
+        <result column="age"           property="age"          jdbcType="INTEGER"/>
+        <result column="num"           property="num"          jdbcType="INTEGER"/>   <!-- 学号 -->
+        <result column="good"          property="good"         jdbcType="BIT"/>
+        <result column="clazz_id"      property="clazzId"      jdbcType="BIGINT"/>    <!-- 所属班级(外键,modelName:Clazz,tableName:demo_class) -->
+    </resultMap>
+    <sql id="studentAllColumns">
+        id,version,name,nick,create_date,create_time,phone_number,age,num,good,clazz_id
+    </sql>
+
+    <!--主键查找-->
+    <select id="find" resultMap="studentResultMap" parameterType="Long">
+        select <include refid="studentAllColumns"/> from demo_student where id = #{id}
+    </select>
+
+    <!--主键删除-->
+    <delete id="delete" parameterType="Long">
+        delete from demo_student where id = #{id}
+    </delete>
+
+
+    <!--按条件删除(不取主键的值进行对比，即主键无效化)-->
+    <delete id="deleteByCriteria" parameterType="com.senpure.demo.criteria.StudentCriteria">
+        delete from demo_student
+        <where>
+            <if test="clazzId != null">
+                and clazz_id = #{clazzId}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="nick != null">
+                and nick = #{nick}
+            </if>
+            <if test="startDate != null">
+                and create_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                and create_time &lt;= #{endDate.time}
+            </if>
+            <if test="phoneNumber != null">
+                and phone_number = #{phoneNumber}
+            </if>
+            <if test="age != null">
+                and age = #{age}
+            </if>
+            <if test="num != null">
+                and num = #{num}
+            </if>
+            <if test="good != null">
+                and good = #{good}
+            </if>
+        </where>
+    </delete>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="save" parameterType="com.senpure.demo.model.Student" >
+        insert into demo_student (<include refid="studentAllColumns"/>)
+        values (#{id},1,#{name},#{nick},#{createDate},#{createTime},#{phoneNumber},#{age},#{num},#{good},#{clazzId})
+    </insert>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="saveBatch" parameterType="com.senpure.demo.model.Student" >
+        insert into demo_student (<include refid="studentAllColumns"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id},1,#{item.name},#{item.nick},#{item.createDate},#{item.createTime},#{item.phoneNumber},#{item.age},#{item.num},#{item.good},#{item.clazzId})
+        </foreach>
+    </insert>
+
+    <!--会进行对象的空值判断，不为空才更新，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="update" parameterType="com.senpure.demo.model.Student">
+        update demo_student
+        <set>
+                <bind name="versionUpdate" value="version + 1"/>
+                version = #{versionUpdate},
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="nick != null">
+                nick = #{nick},
+            </if>
+            <if test="createDate != null">
+                create_date = #{createDate},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="phoneNumber != null">
+                phone_number = #{phoneNumber},
+            </if>
+            <if test="age != null">
+                age = #{age},
+            </if>
+            <if test="num != null">
+                num = #{num},
+            </if>
+            <if test="good != null">
+                good = #{good},
+            </if>
+            <if test="clazzId != null">
+                clazz_id = #{clazzId},
+            </if>
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!-- 直接将值覆盖到数据库，不会做为空判断，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="cover" parameterType="com.senpure.demo.model.Student">
+        update demo_student
+        <set>
+            <bind name="versionUpdate" value="version + 1"/>
+            version = #{versionUpdate},
+            name = #{name},
+            nick = #{nick},
+            create_date = #{createDate},
+            create_time = #{createTime},
+            phone_number = #{phoneNumber},
+            age = #{age},
+            num = #{num},
+            good = #{good},
+            clazz_id = #{clazzId},
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!--会进行对象的空值判断，不为空才更新，主键无值时，可以进行批量更新-->
+    <update id="updateByCriteria" parameterType="com.senpure.demo.criteria.StudentCriteria">
+        update demo_student
+        <set>
+            <choose>
+                <when test="version != null">
+                    <bind name="versionUpdate" value="version + 1"/>
+                    version = #{versionUpdate},
+                </when>
+                <otherwise>
+                    version = version + 1,
+                </otherwise>
+            </choose>
+                <if test="name != null">
+                    name = #{name},
+                </if>
+                <if test="nick != null">
+                    nick = #{nick},
+                </if>
+                <if test="createDate != null">
+                    create_date = #{createDate},
+                </if>
+                <if test="createTime != null">
+                    create_time = #{createTime},
+                </if>
+                <if test="phoneNumber != null">
+                    phone_number = #{phoneNumber},
+                </if>
+                <if test="age != null">
+                    age = #{age},
+                </if>
+                <if test="num != null">
+                    num = #{num},
+                </if>
+                <if test="good != null">
+                    good = #{good},
+                </if>
+                <if test="clazzId != null">
+                    clazz_id = #{clazzId},
+                </if>
+        </set>
+        <where>
+                <if test="id != null">
+                    id = #{id}
+                 </if>
+                <if test="startDate != null">
+                    and create_time >= #{startDate.time}
+                </if>
+                <if test="endDate != null">
+                    and create_time &lt;= #{endDate.time}
+                </if>
+                <if test="version != null">
+                    and version =  #{version}
+                </if>
+        </where>
+     </update>
+
+    <select id="count" resultType="int">
+        select count(*) from demo_student
+    </select>
+
+    <select id="findAll" resultMap="studentResultMap" parameterType="Long">
+        select <include refid="studentAllColumns"/> from demo_student
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="countByCriteria" resultType="int" parameterType="com.senpure.demo.criteria.StudentCriteria">
+        select count(*) from demo_student
+        <where>
+            <if test="clazzId != null">
+                and clazz_id = #{clazzId}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="nick != null">
+                and nick = #{nick}
+            </if>
+            <if test="startDate != null">
+               and create_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                 and create_time &lt;= #{endDate.time}
+            </if>
+            <if test="phoneNumber != null">
+                and phone_number = #{phoneNumber}
+            </if>
+            <if test="age != null">
+                and age = #{age}
+            </if>
+            <if test="num != null">
+                and num = #{num}
+            </if>
+            <if test="good != null">
+                and good = #{good}
+            </if>
+        </where>
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="findByCriteria" parameterType="com.senpure.demo.criteria.StudentCriteria" resultMap="studentResultMap">
+        select <include refid="studentAllColumns"/>
+        from demo_student
+        <where>
+            <if test="clazzId != null">
+                and clazz_id = #{clazzId}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="nick != null">
+                and nick = #{nick}
+            </if>
+            <if test="startDate != null">
+                and create_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                and create_time &lt;= #{endDate.time}
+            </if>
+            <if test="phoneNumber != null">
+                and phone_number = #{phoneNumber}
+            </if>
+            <if test="age != null">
+                and age = #{age}
+            </if>
+            <if test="num != null">
+                and num = #{num}
+            </if>
+            <if test="good != null">
+                and good = #{good}
+            </if>
+        </where>
+        <if test="hasOrder">
+            ORDER BY
+            <foreach collection="order" index="key" item="item" separator=",">
+                <if test="item == 'DESC'">
+                    ${key} DESC
+                </if>
+                <if test="item == 'ASC'">
+                    ${key} ASC
+                </if>
+            </foreach>
+        </if>
+        <if test="usePage">
+            <choose>
+                <when test="firstResult == 0">
+                    limit #{maxResults}
+                </when>
+                <otherwise>
+                    limit #{firstResult}, #{maxResults}
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+</mapper>

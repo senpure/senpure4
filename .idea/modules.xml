@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/senpure.iml" filepath="$PROJECT_DIR$/senpure.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-base/senpure-base.iml" filepath="$PROJECT_DIR$/senpure-base/senpure-base.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-database/senpure-database.iml" filepath="$PROJECT_DIR$/senpure-database/senpure-database.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-database-generator/senpure-database-generator.iml" filepath="$PROJECT_DIR$/senpure-database-generator/senpure-database-generator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-io/senpure-io.iml" filepath="$PROJECT_DIR$/senpure-io/senpure-io.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-jre/senpure-jre.iml" filepath="$PROJECT_DIR$/senpure-jre/senpure-jre.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-log/senpure-log.iml" filepath="$PROJECT_DIR$/senpure-log/senpure-log.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-permission/senpure-permission.iml" filepath="$PROJECT_DIR$/senpure-permission/senpure-permission.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-result/senpure-result.iml" filepath="$PROJECT_DIR$/senpure-result/senpure-result.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-template/senpure-template.iml" filepath="$PROJECT_DIR$/senpure-template/senpure-template.iml" />
+      <module fileurl="file://$PROJECT_DIR$/senpure-web/senpure-web.iml" filepath="$PROJECT_DIR$/senpure-web/senpure-web.iml" />
+    </modules>
+  </component>
+</project>

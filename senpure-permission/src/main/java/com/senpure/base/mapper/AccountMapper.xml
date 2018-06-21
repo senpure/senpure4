@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.senpure.base.mapper.AccountMapper">
+    <resultMap id="accountResultMap" type="com.senpure.base.model.Account">
+        <id     column="id"                     property="id"                   jdbcType="BIGINT"/>    <!-- 主键 -->
+        <result column="version"                property="version"              jdbcType="INTEGER"/>   <!-- 乐观锁，版本控制 -->
+        <result column="account"                property="account"              jdbcType="VARCHAR"/>
+        <result column="password"               property="password"             jdbcType="VARCHAR"/>
+        <result column="name"                   property="name"                 jdbcType="VARCHAR"/>
+        <result column="create_time"            property="createTime"           jdbcType="BIGINT"/>
+        <result column="create_date"            property="createDate"           jdbcType="TIMESTAMP"/>
+        <result column="ip"                     property="ip"                   jdbcType="VARCHAR"/>   <!-- 当前ip -->
+        <result column="ip_number"              property="ipNumber"             jdbcType="BIGINT"/>    <!-- 数字IP，只存一个最接近真实IP的数据 -->
+        <result column="source"                 property="source"               jdbcType="VARCHAR"/>   <!-- 当前来源，火狐，360，手机等 -->
+        <result column="ban_str"                property="banStr"               jdbcType="VARCHAR"/>   <!-- 账号禁止登录的说明 -->
+        <result column="ban_expiry_time"        property="banExpiryTime"        jdbcType="BIGINT"/>
+        <result column="ban_expiry_date"        property="banExpiryDate"        jdbcType="TIMESTAMP"/>
+        <result column="login_time"             property="loginTime"            jdbcType="BIGINT"/>    <!-- 本次登录时间 -->
+        <result column="login_date"             property="loginDate"            jdbcType="TIMESTAMP"/> <!-- 本次登录时间 -->
+        <result column="login_type"             property="loginType"            jdbcType="VARCHAR"/>
+        <result column="online"                 property="online"               jdbcType="BIT"/>
+        <result column="account_state"          property="accountState"         jdbcType="VARCHAR"/>
+        <result column="client"                 property="client"               jdbcType="VARCHAR"/>
+        <result column="client_version"         property="clientVersion"        jdbcType="VARCHAR"/>
+        <result column="client_version_number"  property="clientVersionNumber"  jdbcType="INTEGER"/>
+        <result column="last_login_time"        property="lastLoginTime"        jdbcType="BIGINT"/>
+        <result column="last_login_date"        property="lastLoginDate"        jdbcType="TIMESTAMP"/>
+        <result column="last_logout_time"       property="lastLogoutTime"       jdbcType="BIGINT"/>
+        <result column="last_logout_date"       property="lastLogoutDate"       jdbcType="TIMESTAMP"/>
+        <result column="last_login_type"        property="lastLoginType"        jdbcType="VARCHAR"/>
+        <result column="last_logout_type"       property="lastLogoutType"       jdbcType="VARCHAR"/>
+        <result column="last_login_ip"          property="lastLoginIp"          jdbcType="VARCHAR"/>
+        <result column="last_login_ip_number"   property="lastLoginIpNumber"    jdbcType="BIGINT"/>
+        <result column="last_login_source"      property="lastLoginSource"      jdbcType="VARCHAR"/>
+        <result column="container_id"           property="containerId"          jdbcType="INTEGER"/>   <!-- 外键,modelName:Container,tableName:senpure_container -->
+    </resultMap>
+    <sql id="accountAllColumns">
+        id,version,account,password,name,create_time,create_date,ip,ip_number,source,ban_str,ban_expiry_time,ban_expiry_date,login_time,login_date,login_type,online,account_state,client,client_version,client_version_number,last_login_time,last_login_date,last_logout_time,last_logout_date,last_login_type,last_logout_type,last_login_ip,last_login_ip_number,last_login_source,container_id
+    </sql>
+
+    <!--主键查找-->
+    <select id="find" resultMap="accountResultMap" parameterType="Long">
+        select <include refid="accountAllColumns"/> from senpure_account where id = #{id}
+    </select>
+
+    <!--主键删除-->
+    <delete id="delete" parameterType="Long">
+        delete from senpure_account where id = #{id}
+    </delete>
+
+    <!--按条件删除(不取主键的值进行对比，即主键无效化)-->
+    <delete id="deleteByCriteria" parameterType="com.senpure.base.criteria.AccountCriteria">
+        delete from senpure_account
+        <where>
+            <if test="containerId != null">
+                and container_id = #{containerId}
+            </if>
+            <if test="account != null">
+                and account = #{account}
+            </if>
+            <if test="password != null">
+                and password = #{password}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="ip != null">
+                and ip = #{ip}
+            </if>
+            <if test="ipNumber != null">
+                and ip_number = #{ipNumber}
+            </if>
+            <if test="source != null">
+                and source = #{source}
+            </if>
+            <if test="banStr != null">
+                and ban_str = #{banStr}
+            </if>
+            <if test="banExpiryTime != null">
+                and ban_expiry_time = #{banExpiryTime}
+            </if>
+            <if test="loginTime != null">
+                and login_time = #{loginTime}
+            </if>
+            <if test="loginType != null">
+                and login_type = #{loginType}
+            </if>
+            <if test="online != null">
+                and online = #{online}
+            </if>
+            <if test="accountState != null">
+                and account_state = #{accountState}
+            </if>
+            <if test="client != null">
+                and client = #{client}
+            </if>
+            <if test="clientVersion != null">
+                and client_version = #{clientVersion}
+            </if>
+            <if test="clientVersionNumber != null">
+                and client_version_number = #{clientVersionNumber}
+            </if>
+            <if test="lastLoginTime != null">
+                and last_login_time = #{lastLoginTime}
+            </if>
+            <if test="lastLogoutTime != null">
+                and last_logout_time = #{lastLogoutTime}
+            </if>
+            <if test="startDate != null">
+                and last_logout_date >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                and last_logout_date &lt;= #{endDate}
+            </if>
+            <if test="lastLoginType != null">
+                and last_login_type = #{lastLoginType}
+            </if>
+            <if test="lastLogoutType != null">
+                and last_logout_type = #{lastLogoutType}
+            </if>
+            <if test="lastLoginIp != null">
+                and last_login_ip = #{lastLoginIp}
+            </if>
+            <if test="lastLoginIpNumber != null">
+                and last_login_ip_number = #{lastLoginIpNumber}
+            </if>
+            <if test="lastLoginSource != null">
+                and last_login_source = #{lastLoginSource}
+            </if>
+        </where>
+    </delete>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="save" parameterType="com.senpure.base.model.Account" >
+        insert into senpure_account (<include refid="accountAllColumns"/>)
+        values (#{id},1,#{account},#{password},#{name},#{createTime},#{createDate},#{ip},#{ipNumber},#{source},#{banStr},#{banExpiryTime},#{banExpiryDate},#{loginTime},#{loginDate},#{loginType},#{online},#{accountState},#{client},#{clientVersion},#{clientVersionNumber},#{lastLoginTime},#{lastLoginDate},#{lastLogoutTime},#{lastLogoutDate},#{lastLoginType},#{lastLogoutType},#{lastLoginIp},#{lastLoginIpNumber},#{lastLoginSource},#{containerId})
+    </insert>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="saveBatch" parameterType="com.senpure.base.model.Account" >
+        insert into senpure_account (<include refid="accountAllColumns"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id},1,#{item.account},#{item.password},#{item.name},#{item.createTime},#{item.createDate},#{item.ip},#{item.ipNumber},#{item.source},#{item.banStr},#{item.banExpiryTime},#{item.banExpiryDate},#{item.loginTime},#{item.loginDate},#{item.loginType},#{item.online},#{item.accountState},#{item.client},#{item.clientVersion},#{item.clientVersionNumber},#{item.lastLoginTime},#{item.lastLoginDate},#{item.lastLogoutTime},#{item.lastLogoutDate},#{item.lastLoginType},#{item.lastLogoutType},#{item.lastLoginIp},#{item.lastLoginIpNumber},#{item.lastLoginSource},#{item.containerId})
+        </foreach>
+    </insert>
+
+    <!--会进行对象的空值判断，不为空才更新，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="update" parameterType="com.senpure.base.model.Account">
+        update senpure_account
+        <set>
+                <bind name="versionUpdate" value="version + 1"/>
+                version = #{versionUpdate},
+            <if test="account != null">
+                account = #{account},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="createDate != null">
+                create_date = #{createDate},
+            </if>
+            <if test="ip != null">
+                ip = #{ip},
+            </if>
+            <if test="ipNumber != null">
+                ip_number = #{ipNumber},
+            </if>
+            <if test="source != null">
+                source = #{source},
+            </if>
+            <if test="banStr != null">
+                ban_str = #{banStr},
+            </if>
+            <if test="banExpiryTime != null">
+                ban_expiry_time = #{banExpiryTime},
+            </if>
+            <if test="banExpiryDate != null">
+                ban_expiry_date = #{banExpiryDate},
+            </if>
+            <if test="loginTime != null">
+                login_time = #{loginTime},
+            </if>
+            <if test="loginDate != null">
+                login_date = #{loginDate},
+            </if>
+            <if test="loginType != null">
+                login_type = #{loginType},
+            </if>
+            <if test="online != null">
+                online = #{online},
+            </if>
+            <if test="accountState != null">
+                account_state = #{accountState},
+            </if>
+            <if test="client != null">
+                client = #{client},
+            </if>
+            <if test="clientVersion != null">
+                client_version = #{clientVersion},
+            </if>
+            <if test="clientVersionNumber != null">
+                client_version_number = #{clientVersionNumber},
+            </if>
+            <if test="lastLoginTime != null">
+                last_login_time = #{lastLoginTime},
+            </if>
+            <if test="lastLoginDate != null">
+                last_login_date = #{lastLoginDate},
+            </if>
+            <if test="lastLogoutTime != null">
+                last_logout_time = #{lastLogoutTime},
+            </if>
+            <if test="lastLogoutDate != null">
+                last_logout_date = #{lastLogoutDate},
+            </if>
+            <if test="lastLoginType != null">
+                last_login_type = #{lastLoginType},
+            </if>
+            <if test="lastLogoutType != null">
+                last_logout_type = #{lastLogoutType},
+            </if>
+            <if test="lastLoginIp != null">
+                last_login_ip = #{lastLoginIp},
+            </if>
+            <if test="lastLoginIpNumber != null">
+                last_login_ip_number = #{lastLoginIpNumber},
+            </if>
+            <if test="lastLoginSource != null">
+                last_login_source = #{lastLoginSource},
+            </if>
+            <if test="containerId != null">
+                container_id = #{containerId},
+            </if>
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!-- 直接将值覆盖到数据库，不会做为空判断，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="cover" parameterType="com.senpure.base.model.Account">
+        update senpure_account
+        <set>
+            <bind name="versionUpdate" value="version + 1"/>
+            version = #{versionUpdate},
+            account = #{account},
+            password = #{password},
+            name = #{name},
+            create_time = #{createTime},
+            create_date = #{createDate},
+            ip = #{ip},
+            ip_number = #{ipNumber},
+            source = #{source},
+            ban_str = #{banStr},
+            ban_expiry_time = #{banExpiryTime},
+            ban_expiry_date = #{banExpiryDate},
+            login_time = #{loginTime},
+            login_date = #{loginDate},
+            login_type = #{loginType},
+            online = #{online},
+            account_state = #{accountState},
+            client = #{client},
+            client_version = #{clientVersion},
+            client_version_number = #{clientVersionNumber},
+            last_login_time = #{lastLoginTime},
+            last_login_date = #{lastLoginDate},
+            last_logout_time = #{lastLogoutTime},
+            last_logout_date = #{lastLogoutDate},
+            last_login_type = #{lastLoginType},
+            last_logout_type = #{lastLogoutType},
+            last_login_ip = #{lastLoginIp},
+            last_login_ip_number = #{lastLoginIpNumber},
+            last_login_source = #{lastLoginSource},
+            container_id = #{containerId},
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!--会进行对象的空值判断，不为空才更新，主键无值时，可以进行批量更新-->
+    <update id="updateByCriteria" parameterType="com.senpure.base.criteria.AccountCriteria">
+        update senpure_account
+        <set>
+            <choose>
+                <when test="version != null">
+                    <bind name="versionUpdate" value="version + 1"/>
+                    version = #{versionUpdate},
+                </when>
+                <otherwise>
+                    version = version + 1,
+                </otherwise>
+            </choose>
+                <if test="account != null">
+                    account = #{account},
+                </if>
+                <if test="password != null">
+                    password = #{password},
+                </if>
+                <if test="name != null">
+                    name = #{name},
+                </if>
+                <if test="createTime != null">
+                    create_time = #{createTime},
+                </if>
+                <if test="createDate != null">
+                    create_date = #{createDate},
+                </if>
+                <if test="ip != null">
+                    ip = #{ip},
+                </if>
+                <if test="ipNumber != null">
+                    ip_number = #{ipNumber},
+                </if>
+                <if test="source != null">
+                    source = #{source},
+                </if>
+                <if test="banStr != null">
+                    ban_str = #{banStr},
+                </if>
+                <if test="banExpiryTime != null">
+                    ban_expiry_time = #{banExpiryTime},
+                </if>
+                <if test="banExpiryDate != null">
+                    ban_expiry_date = #{banExpiryDate},
+                </if>
+                <if test="loginTime != null">
+                    login_time = #{loginTime},
+                </if>
+                <if test="loginDate != null">
+                    login_date = #{loginDate},
+                </if>
+                <if test="loginType != null">
+                    login_type = #{loginType},
+                </if>
+                <if test="online != null">
+                    online = #{online},
+                </if>
+                <if test="accountState != null">
+                    account_state = #{accountState},
+                </if>
+                <if test="client != null">
+                    client = #{client},
+                </if>
+                <if test="clientVersion != null">
+                    client_version = #{clientVersion},
+                </if>
+                <if test="clientVersionNumber != null">
+                    client_version_number = #{clientVersionNumber},
+                </if>
+                <if test="lastLoginTime != null">
+                    last_login_time = #{lastLoginTime},
+                </if>
+                <if test="lastLoginDate != null">
+                    last_login_date = #{lastLoginDate},
+                </if>
+                <if test="lastLogoutTime != null">
+                    last_logout_time = #{lastLogoutTime},
+                </if>
+                <if test="lastLogoutDate != null">
+                    last_logout_date = #{lastLogoutDate},
+                </if>
+                <if test="lastLoginType != null">
+                    last_login_type = #{lastLoginType},
+                </if>
+                <if test="lastLogoutType != null">
+                    last_logout_type = #{lastLogoutType},
+                </if>
+                <if test="lastLoginIp != null">
+                    last_login_ip = #{lastLoginIp},
+                </if>
+                <if test="lastLoginIpNumber != null">
+                    last_login_ip_number = #{lastLoginIpNumber},
+                </if>
+                <if test="lastLoginSource != null">
+                    last_login_source = #{lastLoginSource},
+                </if>
+                <if test="containerId != null">
+                    container_id = #{containerId},
+                </if>
+        </set>
+        <where>
+                <if test="id != null">
+                    id = #{id}
+                 </if>
+                <if test="version != null">
+                    and version =  #{version}
+                </if>
+        </where>
+     </update>
+
+    <select id="count" resultType="int">
+        select count(*) from senpure_account
+    </select>
+
+    <select id="findAll" resultMap="accountResultMap" parameterType="Long">
+        select <include refid="accountAllColumns"/> from senpure_account
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="countByCriteria" resultType="int" parameterType="com.senpure.base.criteria.AccountCriteria">
+        select count(*) from senpure_account
+        <where>
+            <if test="containerId != null">
+                and container_id = #{containerId}
+            </if>
+            <if test="account != null">
+                and account = #{account}
+            </if>
+            <if test="password != null">
+                and password = #{password}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="ip != null">
+                and ip = #{ip}
+            </if>
+            <if test="ipNumber != null">
+                and ip_number = #{ipNumber}
+            </if>
+            <if test="source != null">
+                and source = #{source}
+            </if>
+            <if test="banStr != null">
+                and ban_str = #{banStr}
+            </if>
+            <if test="banExpiryTime != null">
+                and ban_expiry_time = #{banExpiryTime}
+            </if>
+            <if test="loginTime != null">
+                and login_time = #{loginTime}
+            </if>
+            <if test="loginType != null">
+                and login_type = #{loginType}
+            </if>
+            <if test="online != null">
+                and online = #{online}
+            </if>
+            <if test="accountState != null">
+                and account_state = #{accountState}
+            </if>
+            <if test="client != null">
+                and client = #{client}
+            </if>
+            <if test="clientVersion != null">
+                and client_version = #{clientVersion}
+            </if>
+            <if test="clientVersionNumber != null">
+                and client_version_number = #{clientVersionNumber}
+            </if>
+            <if test="lastLoginTime != null">
+                and last_login_time = #{lastLoginTime}
+            </if>
+            <if test="lastLogoutTime != null">
+                and last_logout_time = #{lastLogoutTime}
+            </if>
+            <if test="startDate != null">
+               and last_logout_date >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                 and last_logout_date &lt;= #{endDate}
+            </if>
+            <if test="lastLoginType != null">
+                and last_login_type = #{lastLoginType}
+            </if>
+            <if test="lastLogoutType != null">
+                and last_logout_type = #{lastLogoutType}
+            </if>
+            <if test="lastLoginIp != null">
+                and last_login_ip = #{lastLoginIp}
+            </if>
+            <if test="lastLoginIpNumber != null">
+                and last_login_ip_number = #{lastLoginIpNumber}
+            </if>
+            <if test="lastLoginSource != null">
+                and last_login_source = #{lastLoginSource}
+            </if>
+        </where>
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="findByCriteria" parameterType="com.senpure.base.criteria.AccountCriteria" resultMap="accountResultMap">
+        select <include refid="accountAllColumns"/>
+        from senpure_account
+        <where>
+            <if test="containerId != null">
+                and container_id = #{containerId}
+            </if>
+            <if test="account != null">
+                and account = #{account}
+            </if>
+            <if test="password != null">
+                and password = #{password}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="ip != null">
+                and ip = #{ip}
+            </if>
+            <if test="ipNumber != null">
+                and ip_number = #{ipNumber}
+            </if>
+            <if test="source != null">
+                and source = #{source}
+            </if>
+            <if test="banStr != null">
+                and ban_str = #{banStr}
+            </if>
+            <if test="banExpiryTime != null">
+                and ban_expiry_time = #{banExpiryTime}
+            </if>
+            <if test="loginTime != null">
+                and login_time = #{loginTime}
+            </if>
+            <if test="loginType != null">
+                and login_type = #{loginType}
+            </if>
+            <if test="online != null">
+                and online = #{online}
+            </if>
+            <if test="accountState != null">
+                and account_state = #{accountState}
+            </if>
+            <if test="client != null">
+                and client = #{client}
+            </if>
+            <if test="clientVersion != null">
+                and client_version = #{clientVersion}
+            </if>
+            <if test="clientVersionNumber != null">
+                and client_version_number = #{clientVersionNumber}
+            </if>
+            <if test="lastLoginTime != null">
+                and last_login_time = #{lastLoginTime}
+            </if>
+            <if test="lastLogoutTime != null">
+                and last_logout_time = #{lastLogoutTime}
+            </if>
+            <if test="startDate != null">
+                and last_logout_date >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                and last_logout_date &lt;= #{endDate}
+            </if>
+            <if test="lastLoginType != null">
+                and last_login_type = #{lastLoginType}
+            </if>
+            <if test="lastLogoutType != null">
+                and last_logout_type = #{lastLogoutType}
+            </if>
+            <if test="lastLoginIp != null">
+                and last_login_ip = #{lastLoginIp}
+            </if>
+            <if test="lastLoginIpNumber != null">
+                and last_login_ip_number = #{lastLoginIpNumber}
+            </if>
+            <if test="lastLoginSource != null">
+                and last_login_source = #{lastLoginSource}
+            </if>
+        </where>
+        <if test="hasOrder">
+            ORDER BY
+            <foreach collection="order" index="key" item="item" separator=",">
+                <if test="item == 'DESC'">
+                    ${key} DESC
+                </if>
+                <if test="item == 'ASC'">
+                    ${key} ASC
+                </if>
+            </foreach>
+        </if>
+        <if test="usePage">
+            <choose>
+                <when test="firstResult == 0">
+                    limit #{maxResults}
+                </when>
+                <otherwise>
+                    limit #{firstResult}, #{maxResults}
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+</mapper>

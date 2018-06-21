@@ -1,0 +1,7 @@
+org.springframework.boot.SpringApplicationRunListener=\
+   com.senpure.base.configuration.CurrentSpringApplicationRunListener
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.senpure.base.configuration.DefaultBannerShowConfiguration
+
+
+

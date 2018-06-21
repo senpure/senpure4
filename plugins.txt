@@ -1,0 +1,3 @@
+activate-power-model                       炫酷写代码
+EmmyLua                                    lua插件
+Alibaba Java coding Guidelines             代码规范插件

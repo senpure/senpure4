@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.senpure.demo.mapper.ProxyMapper">
+    <resultMap id="proxyResultMap" type="com.senpure.demo.model.Proxy">
+        <id     column="id"         property="id"        jdbcType="BIGINT"/>    <!-- 主键 -->
+        <result column="version"    property="version"   jdbcType="INTEGER"/>   <!-- 乐观锁，版本控制 -->
+        <result column="parent"     property="parent"    jdbcType="BIGINT"/>    <!-- 上级id -->
+        <result column="child"      property="child"     jdbcType="BIGINT"/>    <!-- 上级id -->
+        <result column="level"      property="level"     jdbcType="INTEGER"/>   <!-- 间隔级数 -->
+        <result column="bind_time"  property="bindTime"  jdbcType="BIGINT"/>    <!-- 绑定时间 -->
+        <result column="bind_date"  property="bindDate"  jdbcType="TIMESTAMP"/> <!-- 绑定时间 -->
+    </resultMap>
+    <sql id="proxyAllColumns">
+        id,version,parent,child,level,bind_time,bind_date
+    </sql>
+
+    <!--主键查找-->
+    <select id="find" resultMap="proxyResultMap" parameterType="Long">
+        select <include refid="proxyAllColumns"/> from demo_proxy where id = #{id}
+    </select>
+
+    <!--主键删除-->
+    <delete id="delete" parameterType="Long">
+        delete from demo_proxy where id = #{id}
+    </delete>
+
+
+    <!--按条件删除(不取主键的值进行对比，即主键无效化)-->
+    <delete id="deleteByCriteria" parameterType="com.senpure.demo.criteria.ProxyCriteria">
+        delete from demo_proxy
+        <where>
+            <if test="parent != null">
+                and parent = #{parent}
+            </if>
+            <if test="child != null">
+                and child = #{child}
+            </if>
+            <if test="level != null">
+                and level = #{level}
+            </if>
+            <if test="startDate != null">
+                and bind_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                and bind_time &lt;= #{endDate.time}
+            </if>
+        </where>
+    </delete>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="save" parameterType="com.senpure.demo.model.Proxy" >
+        insert into demo_proxy (<include refid="proxyAllColumns"/>)
+        values (#{id},1,#{parent},#{child},#{level},#{bindTime},#{bindDate})
+    </insert>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="saveBatch" parameterType="com.senpure.demo.model.Proxy" >
+        insert into demo_proxy (<include refid="proxyAllColumns"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id},1,#{item.parent},#{item.child},#{item.level},#{item.bindTime},#{item.bindDate})
+        </foreach>
+    </insert>
+
+    <!--会进行对象的空值判断，不为空才更新，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="update" parameterType="com.senpure.demo.model.Proxy">
+        update demo_proxy
+        <set>
+                <bind name="versionUpdate" value="version + 1"/>
+                version = #{versionUpdate},
+            <if test="parent != null">
+                parent = #{parent},
+            </if>
+            <if test="child != null">
+                child = #{child},
+            </if>
+            <if test="level != null">
+                level = #{level},
+            </if>
+            <if test="bindTime != null">
+                bind_time = #{bindTime},
+            </if>
+            <if test="bindDate != null">
+                bind_date = #{bindDate},
+            </if>
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!-- 直接将值覆盖到数据库，不会做为空判断，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="cover" parameterType="com.senpure.demo.model.Proxy">
+        update demo_proxy
+        <set>
+            <bind name="versionUpdate" value="version + 1"/>
+            version = #{versionUpdate},
+            parent = #{parent},
+            child = #{child},
+            level = #{level},
+            bind_time = #{bindTime},
+            bind_date = #{bindDate},
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!--会进行对象的空值判断，不为空才更新，主键无值时，可以进行批量更新-->
+    <update id="updateByCriteria" parameterType="com.senpure.demo.criteria.ProxyCriteria">
+        update demo_proxy
+        <set>
+            <choose>
+                <when test="version != null">
+                    <bind name="versionUpdate" value="version + 1"/>
+                    version = #{versionUpdate},
+                </when>
+                <otherwise>
+                    version = version + 1,
+                </otherwise>
+            </choose>
+                <if test="parent != null">
+                    parent = #{parent},
+                </if>
+                <if test="child != null">
+                    child = #{child},
+                </if>
+                <if test="level != null">
+                    level = #{level},
+                </if>
+                <if test="bindTime != null">
+                    bind_time = #{bindTime},
+                </if>
+                <if test="bindDate != null">
+                    bind_date = #{bindDate},
+                </if>
+        </set>
+        <where>
+                <if test="id != null">
+                    id = #{id}
+                 </if>
+                <if test="startDate != null">
+                    and bind_time >= #{startDate.time}
+                </if>
+                <if test="endDate != null">
+                    and bind_time &lt;= #{endDate.time}
+                </if>
+                <if test="version != null">
+                    and version =  #{version}
+                </if>
+        </where>
+     </update>
+
+    <select id="count" resultType="int">
+        select count(*) from demo_proxy
+    </select>
+
+    <select id="findAll" resultMap="proxyResultMap" parameterType="Long">
+        select <include refid="proxyAllColumns"/> from demo_proxy
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="countByCriteria" resultType="int" parameterType="com.senpure.demo.criteria.ProxyCriteria">
+        select count(*) from demo_proxy
+        <where>
+            <if test="parent != null">
+                and parent = #{parent}
+            </if>
+            <if test="child != null">
+                and child = #{child}
+            </if>
+            <if test="level != null">
+                and level = #{level}
+            </if>
+            <if test="startDate != null">
+               and bind_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                 and bind_time &lt;= #{endDate.time}
+            </if>
+        </where>
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="findByCriteria" parameterType="com.senpure.demo.criteria.ProxyCriteria" resultMap="proxyResultMap">
+        select <include refid="proxyAllColumns"/>
+        from demo_proxy
+        <where>
+            <if test="parent != null">
+                and parent = #{parent}
+            </if>
+            <if test="child != null">
+                and child = #{child}
+            </if>
+            <if test="level != null">
+                and level = #{level}
+            </if>
+            <if test="startDate != null">
+                and bind_time >= #{startDate.time}
+            </if>
+            <if test="endDate != null">
+                and bind_time &lt;= #{endDate.time}
+            </if>
+        </where>
+        <if test="hasOrder">
+            ORDER BY
+            <foreach collection="order" index="key" item="item" separator=",">
+                <if test="item == 'DESC'">
+                    ${key} DESC
+                </if>
+                <if test="item == 'ASC'">
+                    ${key} ASC
+                </if>
+            </foreach>
+        </if>
+        <if test="usePage">
+            <choose>
+                <when test="firstResult == 0">
+                    limit #{maxResults}
+                </when>
+                <otherwise>
+                    limit #{firstResult}, #{maxResults}
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.senpure.base.mapper.SequenceMapper">
+    <resultMap id="sequenceResultMap" type="com.senpure.base.model.Sequence">
+        <id     column="id"        property="id"        jdbcType="BIGINT"/>  <!-- 主键 -->
+        <result column="version"   property="version"   jdbcType="INTEGER"/> <!-- 乐观锁，版本控制 -->
+        <result column="type"      property="type"      jdbcType="VARCHAR"/> <!-- 标识 -->
+        <result column="prefix"    property="prefix"    jdbcType="VARCHAR"/> <!-- 前缀 -->
+        <result column="suffix"    property="suffix"    jdbcType="VARCHAR"/> <!-- 后缀 -->
+        <result column="sequence"  property="sequence"  jdbcType="INTEGER"/> <!-- 当前序列号 -->
+        <result column="digit"     property="digit"     jdbcType="INTEGER"/> <!-- 格式化的长度 -->
+        <result column="span"      property="span"      jdbcType="INTEGER"/> <!-- 每次增长 -->
+    </resultMap>
+    <sql id="sequenceAllColumns">
+        id,version,type,prefix,suffix,sequence,digit,span
+    </sql>
+
+    <!--主键查找-->
+    <select id="find" resultMap="sequenceResultMap" parameterType="Long">
+        select <include refid="sequenceAllColumns"/> from senpure_sequence where id = #{id}
+    </select>
+
+    <!--主键删除-->
+    <delete id="delete" parameterType="Long">
+        delete from senpure_sequence where id = #{id}
+    </delete>
+
+    <!--按条件删除(不取主键的值进行对比，即主键无效化)-->
+    <delete id="deleteByCriteria" parameterType="com.senpure.base.criteria.SequenceCriteria">
+        delete from senpure_sequence
+        <where>
+            <if test="type != null">
+                and type = #{type}
+            </if>
+            <if test="prefix != null">
+                and prefix = #{prefix}
+            </if>
+            <if test="suffix != null">
+                and suffix = #{suffix}
+            </if>
+            <if test="sequence != null">
+                and sequence = #{sequence}
+            </if>
+            <if test="digit != null">
+                and digit = #{digit}
+            </if>
+            <if test="span != null">
+                and span = #{span}
+            </if>
+        </where>
+    </delete>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="save" parameterType="com.senpure.base.model.Sequence" >
+        insert into senpure_sequence (<include refid="sequenceAllColumns"/>)
+        values (#{id},1,#{type},#{prefix},#{suffix},#{sequence},#{digit},#{span})
+    </insert>
+
+    <!-- 取对象的值，直接插入数据库(包括空值),version字段(版本控制)，被初始化为1-->
+    <insert id="saveBatch" parameterType="com.senpure.base.model.Sequence" >
+        insert into senpure_sequence (<include refid="sequenceAllColumns"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id},1,#{item.type},#{item.prefix},#{item.suffix},#{item.sequence},#{item.digit},#{item.span})
+        </foreach>
+    </insert>
+
+    <!--会进行对象的空值判断，不为空才更新，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="update" parameterType="com.senpure.base.model.Sequence">
+        update senpure_sequence
+        <set>
+                <bind name="versionUpdate" value="version + 1"/>
+                version = #{versionUpdate},
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="prefix != null">
+                prefix = #{prefix},
+            </if>
+            <if test="suffix != null">
+                suffix = #{suffix},
+            </if>
+            <if test="sequence != null">
+                sequence = #{sequence},
+            </if>
+            <if test="digit != null">
+                digit = #{digit},
+            </if>
+            <if test="span != null">
+                span = #{span},
+            </if>
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!-- 直接将值覆盖到数据库，不会做为空判断，以主键进行where判断,version字段(版本控制)，必须有有效值-->
+    <update id="cover" parameterType="com.senpure.base.model.Sequence">
+        update senpure_sequence
+        <set>
+            <bind name="versionUpdate" value="version + 1"/>
+            version = #{versionUpdate},
+            type = #{type},
+            prefix = #{prefix},
+            suffix = #{suffix},
+            sequence = #{sequence},
+            digit = #{digit},
+            span = #{span},
+        </set>
+        where id = #{id}  and version =  #{version}
+    </update>
+
+    <!--会进行对象的空值判断，不为空才更新，主键无值时，可以进行批量更新-->
+    <update id="updateByCriteria" parameterType="com.senpure.base.criteria.SequenceCriteria">
+        update senpure_sequence
+        <set>
+            <choose>
+                <when test="version != null">
+                    <bind name="versionUpdate" value="version + 1"/>
+                    version = #{versionUpdate},
+                </when>
+                <otherwise>
+                    version = version + 1,
+                </otherwise>
+            </choose>
+                <if test="type != null">
+                    type = #{type},
+                </if>
+                <if test="prefix != null">
+                    prefix = #{prefix},
+                </if>
+                <if test="suffix != null">
+                    suffix = #{suffix},
+                </if>
+                <if test="sequence != null">
+                    sequence = #{sequence},
+                </if>
+                <if test="digit != null">
+                    digit = #{digit},
+                </if>
+                <if test="span != null">
+                    span = #{span},
+                </if>
+        </set>
+        <where>
+                <if test="id != null">
+                    id = #{id}
+                 </if>
+                <if test="version != null">
+                    and version =  #{version}
+                </if>
+        </where>
+     </update>
+
+    <select id="count" resultType="int">
+        select count(*) from senpure_sequence
+    </select>
+
+    <select id="findAll" resultMap="sequenceResultMap" parameterType="Long">
+        select <include refid="sequenceAllColumns"/> from senpure_sequence
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="countByCriteria" resultType="int" parameterType="com.senpure.base.criteria.SequenceCriteria">
+        select count(*) from senpure_sequence
+        <where>
+            <if test="type != null">
+                and type = #{type}
+            </if>
+            <if test="prefix != null">
+                and prefix = #{prefix}
+            </if>
+            <if test="suffix != null">
+                and suffix = #{suffix}
+            </if>
+            <if test="sequence != null">
+                and sequence = #{sequence}
+            </if>
+            <if test="digit != null">
+                and digit = #{digit}
+            </if>
+            <if test="span != null">
+                and span = #{span}
+            </if>
+        </where>
+    </select>
+
+    <!--主键会无效化,不会进行条件对比-->
+    <select id="findByCriteria" parameterType="com.senpure.base.criteria.SequenceCriteria" resultMap="sequenceResultMap">
+        select <include refid="sequenceAllColumns"/>
+        from senpure_sequence
+        <where>
+            <if test="type != null">
+                and type = #{type}
+            </if>
+            <if test="prefix != null">
+                and prefix = #{prefix}
+            </if>
+            <if test="suffix != null">
+                and suffix = #{suffix}
+            </if>
+            <if test="sequence != null">
+                and sequence = #{sequence}
+            </if>
+            <if test="digit != null">
+                and digit = #{digit}
+            </if>
+            <if test="span != null">
+                and span = #{span}
+            </if>
+        </where>
+        <if test="hasOrder">
+            ORDER BY
+            <foreach collection="order" index="key" item="item" separator=",">
+                <if test="item == 'DESC'">
+                    ${key} DESC
+                </if>
+                <if test="item == 'ASC'">
+                    ${key} ASC
+                </if>
+            </foreach>
+        </if>
+        <if test="usePage">
+            <choose>
+                <when test="firstResult == 0">
+                    limit #{maxResults}
+                </when>
+                <otherwise>
+                    limit #{firstResult}, #{maxResults}
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+</mapper>

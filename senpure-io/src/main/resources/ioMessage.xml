@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<messages package="com.senpure.io" id="1" model="io">
+    <bean name="HandleMessage">
+        <field type="int" name="handleMessageId" explain="可以处理的消息ID"></field>
+        <field type="String" name="messageClasses" explain="消息类名"></field>
+
+        <field type="boolean" name="serverShare" explain="是否共享messageId 不同的服务都可以处理"></field>
+        <field type="int" name="messageType" explain="消息类型 0 可以直接转发过来 1 网关读取范围  2 网关询问"></field>
+        <field type="int" name="valueType" explain="数字类型 0int 1 long"></field>
+        <field type="long" name="numStart" explain="范围开始"></field>
+        <field type="long" name="numEnd" explain="范围结束"></field>
+    </bean>
+
+    <message id="104" type="SC" name="RegServerHandleMessage" explain="服务器注册消息处理器到网关">
+        <field type="String" name="serverName" explain="服务器名"></field>
+        <field type="String" name="ipAndFirstPort" explain="ip和端口号"></field>
+        <field type="String" name="readableServerName" explain="服务器名"></field>
+        <list type="HandleMessage" name="messages" explain="可以处理的消息"></list>
+    </message>
+
+    <message id="101" type="CS" name="RelationPlayerGateway" explain="关联玩家与网关">
+        <field type="int" name="token" explain="channel token"></field>
+        <field type="int" name="playerId" explain="玩家Id"></field>
+    </message>
+
+    <message id="103" type="CS" name="ChannelOffline" explain="客户端掉线">
+        <field type="int" name="token" explain="channel token"></field>
+        <field type="int" name="playerId" explain="玩家Id"></field>
+    </message>
+
+    <message id="105" type="CS" name="AskHandle" explain="询问服务器是否可以处理该值得请求">
+        <field type="long" name="token" explain="token"></field>
+        <field type="int" name="fromMessageId" explain="消息ID"></field>
+        <field type="String" name="value" explain="值"></field>
+    </message>
+    <message id="106" type="SC" name="AskHandle" explain="应答是否可以请求">
+        <field type="boolean" name="handle" explain="是否可以处理"></field>
+        <field type="long" name="token" explain="token"></field>
+        <field type="int" name="fromMessageId" explain="消息ID"></field>
+        <field type="String" name="value" explain="值"></field>
+    </message>
+</messages>

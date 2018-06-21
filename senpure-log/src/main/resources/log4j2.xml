@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="warn" monitorInterval="30">
+    <Properties>
+        <Property name="PID">????</Property>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="LOG_PATTERN">%clr{%d{HH:mm:ss.SSS}}{faint} %clr{${LOG_LEVEL_PATTERN}}%clr{[%15.15t]}{faint}%clr{%-60.60c}{cyan} %clr{[%-4L]}{magenta}%clr{:}{faint}%m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}
+        </Property>
+    </Properties>
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        <RollingFile name="ROLLING" fileName="senpure_log.log"
+                     filePattern="senpure_log.%d{yyyy-MM-dd}_%i.log">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="51200 KB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+
+        <RollingFile name="ERROR" fileName="ybmj_error.log"
+                     filePattern="ybmj_error.%d{yyyy-MM-dd}_%i.log">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <Filters>
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="512 KB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+        <Console name="ConsoleSql" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <RegexFilter
+                    regex=".*executed. insert[\s\S]*|.*executed. update[\s\S]*|.*executed. select[\s\S]*|.*executed. delete[\s\S]*"
+                    onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+    </appenders>
+    <loggers>
+        <!--  -->
+        <logger name="org.springframework" level="info"></logger>
+        <logger name="springfox" level="info"></logger>
+        <logger name="freemarker.beans" level="info"></logger>
+        <logger name="freemarker.cache" level="info"></logger>
+        <logger name="org.apache.ibatis.io.ResolverUtil" level="info"></logger>
+        <logger name="org.apache.ibatis.io.DefaultVFS" level="info"></logger>
+        <logger name="org.eclipse.jetty" level="info"/>
+
+        <logger name="druid.sql" level="trace" additivity="false">
+            <AppenderRef ref="ConsoleSql"/>
+            <AppenderRef ref="ROLLING"/>
+        </logger>
+
+        <logger name="com.senpure.io.MessageLoggingHandler" level="debug"></logger>
+        <logger name="org.hibernate" level="info"></logger>
+        <logger name="org.hibernate.hql" level="debug"></logger>
+        <logger name="org.hibernate.hql.internal.ast" level="info"></logger>
+        <logger name="com.senpure.base.calculate" level="trace"></logger>
+
+        <root level="debug" includeLocation="true">
+
+            <AppenderRef ref="ROLLING"></AppenderRef>
+        </root>
+    </loggers>
+</configuration>

@@ -1,0 +1,2 @@
+mvn versions:commit
+pause

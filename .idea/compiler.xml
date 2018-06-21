@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="senpure-base" />
+        <module name="senpure-database" />
+        <module name="senpure-database-generator" />
+        <module name="senpure-del" />
+        <module name="senpure-io" />
+        <module name="senpure-jre" />
+        <module name="senpure-log" />
+        <module name="senpure-permission" />
+        <module name="senpure-result" />
+        <module name="senpure-template" />
+        <module name="senpure-web" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="senpure" target="1.5" />
+      <module name="senpure-base" target="1.8" />
+      <module name="senpure-config" target="1.8" />
+      <module name="senpure-database" target="1.8" />
+      <module name="senpure-database-generator" target="1.8" />
+      <module name="senpure-del" target="1.8" />
+      <module name="senpure-io" target="1.8" />
+      <module name="senpure-io-generator" target="1.8" />
+      <module name="senpure-jre" target="1.8" />
+      <module name="senpure-learn" target="1.8" />
+      <module name="senpure-log" target="1.8" />
+      <module name="senpure-mix" target="1.8" />
+      <module name="senpure-permission" target="1.8" />
+      <module name="senpure-result" target="1.8" />
+      <module name="senpure-template" target="1.8" />
+      <module name="senpure-web" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
